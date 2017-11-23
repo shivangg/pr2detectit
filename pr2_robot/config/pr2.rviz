@@ -93,8 +93,8 @@ Visualization Manager:
       Selectable: true
       Size (Pixels): 3
       Size (m): 0.00999999978
-      Style: Points
-      Topic: /camera/depth_registered/points
+      Style: Flat Squares
+      Topic: /pr2/world/points
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -646,7 +646,7 @@ Visualization Manager:
       Marker Topic: /object_markers
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
   Enabled: true
@@ -687,10 +687,10 @@ Visualization Manager:
       Focal Shape Size: 0.0500000007
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.660399318
+      Pitch: 1.1097964
       Target Frame: base_link
       Value: Orbit (rviz)
-      Yaw: 0.96991533
+      Yaw: 0.214917615
     Saved: ~
 Window Geometry:
   Camera:
@@ -716,5 +716,5 @@ Window Geometry:
   Views:
     collapsed: true
   Width: 1416
-  X: 828
-  Y: 31
+  X: 268
+  Y: 21
