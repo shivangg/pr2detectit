@@ -62,7 +62,7 @@ def pcl_callback(pcl_msg):
     # number of points to analyse in the neighbourhood
     outlier_filter.set_mean_k(70)
     # set threshold filter
-    x = 0.0001
+    x = 0.00005
 
     # Any point with a mean distance larger than global (mean distance+x*std_dev) will be considered outlier
     outlier_filter.set_std_dev_mul_thresh(x)
@@ -83,7 +83,7 @@ def pcl_callback(pcl_msg):
     filter_axis = 'z'
     passthrough_z.set_filter_field_name(filter_axis)
     axis_min = 0.608
-    axis_max = 0.7
+    axis_max = 1.0
     passthrough_z.set_filter_limits(axis_min, axis_max)
     cloud_filtered = passthrough_z.filter()
 
@@ -105,7 +105,7 @@ def pcl_callback(pcl_msg):
     seg.set_method_type(pcl.SAC_RANSAC)
 
     # max distance for the point to be considered fit
-    max_distance = 0.001
+    max_distance = 0.01
     seg.set_distance_threshold(max_distance)
 
     ## TODO: Extract inliers and outliers
@@ -128,8 +128,8 @@ def pcl_callback(pcl_msg):
     # as well as max. and min. cluster size(in points)
 
     ec.set_ClusterTolerance(0.02)
-    ec.set_MinClusterSize(20)
-    ec.set_MaxClusterSize(300000)
+    ec.set_MinClusterSize(10)
+    ec.set_MaxClusterSize(1200)
 
     # search the kd tree for clusters
     ec.set_SearchMethod(tree)
@@ -169,7 +169,7 @@ def pcl_callback(pcl_msg):
     # Classify the clusters!
     detected_objects_labels = []
     detected_objects = []
-   
+
     for index, pts_list in enumerate(cluster_indices):
             # Grab the points for the cluster from the extracted outliers (cloud_objects)
             pcl_cluster = extracted_outliers.extract(pts_list)
@@ -216,41 +216,112 @@ def pcl_callback(pcl_msg):
         pass
 
 # function to load parameters and request PickPlace service
-def pr2_mover(object_list):
+def pr2_mover(detected_objects):
 
     # TODO: Initialize variables
+    test_scene_num = Int32()
+    arm_name = String()
+    object_name = String()
+    pick_pose = Pose()
+    place_pose = Pose()
 
+    detected_object_list = []
+    yaml_list = []
+    for i in range(len(detected_objects)):
+        # print(detected_objects[i].label)
+        detected_object_list.append(detected_objects[i].label)
+
+    yaml_dict  = {}
+    filename = "output.yaml"
+    object_group = ''
+    labels = []
+    centroids = []
+    object_list = []
+    
     # TODO: Get/Read parameters
+    object_list_param = rospy.get_param('/object_list')
+    
+    # run for all the objects in the list
+    for i in range(len(object_list_param)):
+        object_list.append( (object_list_param[i]['name'], object_list_param[i]['group']) )
+
 
     # TODO: Parse parameters into individual variables
+    test_scene_num.data = 1
 
     # TODO: Rotate PR2 in place to capture side tables for the collision map
 
     # TODO: Loop through the pick list
+    for item, group in object_list:
+        print("item, group in yamla",item, group, "detected", detected_object_list)
+        if item in detected_object_list:
+            labels = [item]
+            object_group = group
+            index_item = detected_object_list.index(item)
+            # TODO: Get the PointCloud for a given object and obtain it's centroid
+            points_arr = ros_to_pcl( detected_objects[detected_object_list.index(item)].cloud).to_array()
+            position_mean_list = np.mean(points_arr, axis = 0)[:3]
+            centroids = [[np.asscalar(position_mean_list[0]), np.asscalar(position_mean_list[1]), np.asscalar(position_mean_list[2])]]
+            # print("centroid", centroids)
 
-        # TODO: Get the PointCloud for a given object and obtain it's centroid
+            # TODO: Create 'pick_pose' for the object        
+            pick_pose.position.x = centroids[0][0]
+            pick_pose.position.y = centroids[0][1]
+            pick_pose.position.z = centroids[0][2]
 
-        # TODO: Create 'place_pose' for the object
+            pick_pose.orientation.x = 0
+            pick_pose.orientation.y = 0
+            pick_pose.orientation.z = 0
+            pick_pose.orientation.w = 1
 
-        # TODO: Assign the arm to be used for pick_place
+            # TODO: Create 'place_pose' for the object    
+            place_point_position = rospy.get_param('/dropbox')
 
-        # TODO: Create a list of dictionaries (made with make_yaml_dict()) for later output to yaml format
+            place_pose.orientation.x = 0
+            place_pose.orientation.y = 0
+            place_pose.orientation.z = 0
+            place_pose.orientation.w = 1
 
-        # Wait for 'pick_place_routine' service to come up
-        rospy.wait_for_service('pick_place_routine')
+            # The name of the object to be picked
+            object_name.data = labels[0]
 
-        try:
-            pick_place_routine = rospy.ServiceProxy('pick_place_routine', PickPlace)
+            # TODO: Assign the arm to be used for pick_place
+            if object_group is 'red':
+                arm_name.data = 'left'
+                place_pose.position.x = place_point_position[0]['position'][0]
+                place_pose.position.y = place_point_position[0]['position'][1]
+                place_pose.position.z = place_point_position[0]['position'][2]
+            else:
+                arm_name.data = 'right'
+                place_pose.position.x = place_point_position[1]['position'][0]
+                place_pose.position.y = place_point_position[1]['position'][1]
+                place_pose.position.z = place_point_position[1]['position'][2]
 
-            # TODO: Insert your message variables to be sent as a service request
-            resp = pick_place_routine(TEST_SCENE_NUM, OBJECT_NAME, WHICH_ARM, PICK_POSE, PLACE_POSE)
 
-            print ("Response: ",resp.success)
+            # TODO: Create a list of dictionaries (made with make_yaml_dict()) for later output to yaml format
+            # print("sending for yaml dict", test_scene_num, arm_name, object_name, pick_pose, place_pose )
+            yaml_dict =  make_yaml_dict(test_scene_num, arm_name, object_name, pick_pose, place_pose )
+            yaml_list.append(yaml_dict)
+            # print("yaml dictionary given back", yaml_dict)
 
-        except rospy.ServiceException, e:
-            print "Service call failed: %s"%e
-
+    
     # TODO: Output your request parameters into output yaml file
+    send_to_yaml(filename , yaml_list)
+
+    # Wait for 'pick_place_routine' service to come up
+    rospy.wait_for_service('pick_place_routine')
+
+    # try:
+    #     pick_place_routine = rospy.ServiceProxy('pick_place_routine', PickPlace)
+
+    #     # TODO: Insert your message variables to be sent as a service request
+    #     resp = pick_place_routine(test_scene_num, object_name, arm_name, pick_pose, place_pose)
+
+    #     print ("Response: ",resp.success)
+
+    # except rospy.ServiceException, e:
+    #     print "Service call failed: %s"%e
+
 
 
 
