@@ -8,9 +8,9 @@ object_list:
       y: 0
       z: 0
     position:
-      x: 0.5718739032745361
-      y: -0.2497027963399887
-      z: 0.7048781514167786
+      x: 0.5716531872749329
+      y: -0.2497532218694687
+      z: 0.7056272029876709
   place_pose:
     orientation:
       w: 1
@@ -21,7 +21,7 @@ object_list:
       x: 0
       y: -0.71
       z: 0.605
-  test_scene_num: 1
+  test_scene_num: 2
 - arm_name: right
   object_name: soap
   pick_pose:
@@ -31,9 +31,9 @@ object_list:
       y: 0
       z: 0
     position:
-      x: 0.5611454248428345
-      y: 0.002548220567405224
-      z: 0.6758498549461365
+      x: 0.5612174272537231
+      y: 0.0029598509427160025
+      z: 0.6750465631484985
   place_pose:
     orientation:
       w: 1
@@ -44,7 +44,7 @@ object_list:
       x: 0
       y: -0.71
       z: 0.605
-  test_scene_num: 1
+  test_scene_num: 2
 - arm_name: right
   object_name: book
   pick_pose:
@@ -54,9 +54,9 @@ object_list:
       y: 0
       z: 0
     position:
-      x: 0.5811946392059326
-      y: 0.2784939408302307
-      z: 0.7219786643981934
+      x: 0.581299901008606
+      y: 0.27863049507141113
+      z: 0.7219426035881042
   place_pose:
     orientation:
       w: 1
@@ -67,7 +67,7 @@ object_list:
       x: 0
       y: -0.71
       z: 0.605
-  test_scene_num: 1
+  test_scene_num: 2
 - arm_name: right
   object_name: soap2
   pick_pose:
@@ -77,9 +77,9 @@ object_list:
       y: 0
       z: 0
     position:
-      x: 0.4448123574256897
-      y: 0.2269526571035385
-      z: 0.6763651967048645
+      x: 0.44527262449264526
+      y: 0.22742711007595062
+      z: 0.6768080592155457
   place_pose:
     orientation:
       w: 1
@@ -90,7 +90,7 @@ object_list:
       x: 0
       y: -0.71
       z: 0.605
-  test_scene_num: 1
+  test_scene_num: 2
 - arm_name: right
   object_name: glue
   pick_pose:
@@ -100,9 +100,9 @@ object_list:
       y: 0
       z: 0
     position:
-      x: 0.6311668157577515
-      y: 0.1310739815235138
-      z: 0.6797334551811218
+      x: 0.6312140822410583
+      y: 0.13119366765022278
+      z: 0.6793517470359802
   place_pose:
     orientation:
       w: 1
@@ -113,4 +113,4 @@ object_list:
       x: 0
       y: -0.71
       z: 0.605
-  test_scene_num: 1
+  test_scene_num: 2
