@@ -247,7 +247,7 @@ def pr2_mover(detected_objects):
 
 
     # TODO: Parse parameters into individual variables
-    test_scene_num.data = 1
+    test_scene_num.data = 3
 
     # TODO: Rotate PR2 in place to capture side tables for the collision map
 
