@@ -1,0 +1,3 @@
+[submodule "sensor_stick"]
+	path = sensor_stick
+	url = ../sensor_stick
