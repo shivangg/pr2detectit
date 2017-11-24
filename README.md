@@ -106,9 +106,11 @@ Features are stored as normalized histogram (unit variance and zero mean) and gi
 
 ##### Specifications
 
-Iterations 	| 99
-Bins 	   	| 32 
-accuracy	| 90% (approx)
+| Name 		|  Value 		|
+   ---		|	---			
+|Iterations	| 99			|
+|Bins 	   	| 32 			|
+|accuracy	| 90% (approx) 	|
 
 #### Objects Detection
 
