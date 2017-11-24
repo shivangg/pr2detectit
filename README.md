@@ -114,9 +114,8 @@ accuracy	| 90% (approx)
 
 ![detecedObjects](images/project/detected_objects.PNG)  
 
-The trained SVM model classifies the captures point out into an object. The accuracy of the model depends on the quality and number of object data samples the SVM was trained on.
+The trained SVM model classifies the captures point out into an object. The accuracy of the model depends on the quality and number of object data samples the SVM was trained on. The `output_*.yaml` files for `test\*.world` can be found under `pr2_robot/scripts/`. Only the `glue` was not getting detected in `test3.world` because a `book` was in front of it. On deleting the book in front, the glue was successfully detected. The output file of this scenario is labeled `output_3_glue_detected.yaml`.  
 
-how you might improve it if you were going to pursue this project further.  
 
 ### Conclusion:
 This project might fail if:
