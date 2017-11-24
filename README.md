@@ -93,7 +93,7 @@ Features are stored as normalized histogram (unit variance and zero mean) and gi
 1. Given features and labels of data points, it is trained and computes a decision boundary.
 2. Uses the decision boundary to predict the new label of new data points.
 
-![detecedObjects](/images/project/SVMScore.PNG)  
+![detecedObjects](images/project/SVMScore.PNG)  
 ### Steps taken to use the SVM:
 
 1. Read the input images.
