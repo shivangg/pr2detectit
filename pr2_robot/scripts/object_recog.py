@@ -70,11 +70,16 @@ def pcl_callback(pcl_msg):
     # Finally call the filter function for magic
     cloud = outlier_filter.filter()
 
+    # publish the results of Statistical outlier filtering
+    statistical_pub.publish(pcl_to_ros(cloud))
+
     ## TODO: Voxel Grid Downsampling
     vox = cloud.make_voxel_grid_filter()
     LEAF_SIZE = 0.01
     vox.set_leaf_size(LEAF_SIZE, LEAF_SIZE, LEAF_SIZE)
     cloud_filtered = vox.filter()
+
+    vowel_pub.publish(pcl_to_ros(cloud_filtered))
 
     ## TODO: PassThrough Filter 
 
@@ -96,6 +101,8 @@ def pcl_callback(pcl_msg):
     axis_max = 10.37
     passthrough_x.set_filter_limits(axis_min, axis_max)
     cloud_filtered = passthrough_x.filter()
+
+    passthrough_pub.publish(pcl_to_ros(cloud_filtered))
  
     ## TODO: RANSAC Plane Segmentation
     seg = cloud_filtered.make_segmenter()
@@ -334,11 +341,19 @@ if __name__ == '__main__':
     rospy.Subscriber("/pr2/world/points", pc2.PointCloud2, pcl_callback, queue_size = 1)
 
     # TODO: Create Publishers
+
+    ## RANSAC publishing
     pcl_objects_pub = rospy.Publisher('/pcl_objects', PointCloud2, queue_size = 1)
     pcl_table_pub = rospy.Publisher('/pcl_table', PointCloud2, queue_size = 1)
+    
     pcl_cluster_pub = rospy.Publisher('/pcl_cluster', PointCloud2, queue_size = 1)  
+    
     object_markers_pub = rospy.Publisher('/object_markers', Marker, queue_size = 1)
     detected_objects_pub = rospy.Publisher('/detected_objects', DetectedObjectsArray, queue_size = 1)
+
+    statistical_pub = rospy.Publisher('/statistical_downsampled', PointCloud2, queue_size = 1)
+    vowel_pub = rospy.Publisher('/vowel_downsampled', PointCloud2, queue_size = 1)
+    passthrough_pub = rospy.Publisher('/passthrough_downsampled', PointCloud2, queue_size = 1)
 
     # TODO: Load Model From disk
     model = pickle.load(open('model.sav', 'rb'))
@@ -353,3 +368,4 @@ if __name__ == '__main__':
     # TODO: Spin while node is not shutdown
     while not rospy.is_shutdown():
         rospy.spin()
+
