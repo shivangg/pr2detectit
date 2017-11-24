@@ -112,7 +112,7 @@ accuracy	| 90% (approx)
 
 #### Objects Detection
 
-![detecedObjects](/images/project/deteced_objects.PNG)  
+![detecedObjects](images/project/detected_objects.PNG)  
 
 The trained SVM model classifies the captures point out into an object. The accuracy of the model depends on the quality and number of object data samples the SVM was trained on.
 
