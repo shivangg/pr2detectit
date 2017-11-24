@@ -53,14 +53,15 @@ def send_to_yaml(yaml_filename, dict_list):
 # Callback function for your Point Cloud Subscriber
 def pcl_callback(pcl_msg):
 
-    ## TODO: Convert ROS msg to PCL data
+    # Convert ROS msg to PCL data
     cloud = ros_to_pcl(pcl_msg)
 
-    ## TODO: Statistical filtering
+    ## Statistical filtering
     outlier_filter = cloud.make_statistical_outlier_filter()
 
-    # number of points to analyse in the neighbourhood
+    # Number of points to analyse in the neighbourhood
     outlier_filter.set_mean_k(70)
+
     # set threshold filter
     x = 0.00005
 
@@ -73,15 +74,18 @@ def pcl_callback(pcl_msg):
     # publish the results of Statistical outlier filtering
     statistical_pub.publish(pcl_to_ros(cloud))
 
-    ## TODO: Voxel Grid Downsampling
+
+    # Voxel Grid Downsampling
     vox = cloud.make_voxel_grid_filter()
     LEAF_SIZE = 0.01
+    # a cube of leaf size
     vox.set_leaf_size(LEAF_SIZE, LEAF_SIZE, LEAF_SIZE)
     cloud_filtered = vox.filter()
 
+    # publish the results of vowel downsampling
     vowel_pub.publish(pcl_to_ros(cloud_filtered))
 
-    ## TODO: PassThrough Filter 
+    ## PassThrough Filter 
 
     # passthrough in z direction
     passthrough_z = cloud_filtered.make_passthrough_filter()
@@ -93,7 +97,6 @@ def pcl_callback(pcl_msg):
     cloud_filtered = passthrough_z.filter()
 
     # passthrough in the x direction
-
     passthrough_x = cloud_filtered.make_passthrough_filter()
     filter_axis = 'x'
     passthrough_x.set_filter_field_name(filter_axis)
@@ -102,9 +105,10 @@ def pcl_callback(pcl_msg):
     passthrough_x.set_filter_limits(axis_min, axis_max)
     cloud_filtered = passthrough_x.filter()
 
+    # publish the results of Statistical outlier filtering
     passthrough_pub.publish(pcl_to_ros(cloud_filtered))
  
-    ## TODO: RANSAC Plane Segmentation
+    ## RANSAC Plane Segmentation
     seg = cloud_filtered.make_segmenter()
  
     # set the model which has to be fit
@@ -115,37 +119,35 @@ def pcl_callback(pcl_msg):
     max_distance = 0.01
     seg.set_distance_threshold(max_distance)
 
-    ## TODO: Extract inliers and outliers
+    ## Extract inliers and outliers
    
     inliers, coefficients = seg.segment()
-
-    # Extract inliers
     extracted_outliers = cloud_filtered.extract(inliers, negative = True)
     extracted_inliers = cloud_filtered.extract(inliers, negative = False)
 
-    # TODO: Euclidean Clustering
+    ## Euclidean Clustering
     white_cloud = XYZRGB_to_XYZ(extracted_outliers)
-    # white_cloud = XYZRGB_to_XYZ(cloud_filtered)
     tree = white_cloud.make_kdtree()
 
     # create a cluster extraction object
-
     ec = white_cloud.make_EuclideanClusterExtraction()
+
     # set tolerance for distance threshold
     # as well as max. and min. cluster size(in points)
-
     ec.set_ClusterTolerance(0.02)
     ec.set_MinClusterSize(10)
     ec.set_MaxClusterSize(1200)
 
     # search the kd tree for clusters
     ec.set_SearchMethod(tree)
+    
     # extract indices for each of the discovered cluster
     cluster_indices = ec.Extract()
-    # TODO: Create Cluster-Mask Point Cloud to visualize each cluster separately
 
+    ## Create Cluster-Mask Point Cloud to visualize each cluster separately
     cluster_color = get_color_list(len(cluster_indices))
 
+    # list to store the different point cloud clusters list 
     color_cluster_point_list = []
 
     for j, indices in enumerate(cluster_indices):
@@ -160,14 +162,13 @@ def pcl_callback(pcl_msg):
     cluster_cloud = pcl.PointCloud_PointXYZRGB()
     cluster_cloud.from_list(color_cluster_point_list)
  
-    # TODO: Convert PCL data to ROS messages
-   
+    # Convert PCL data to ROS messages
     pcl_to_ros_objects = pcl_to_ros(extracted_outliers)
     pcl_to_ros_table = pcl_to_ros(extracted_inliers)
-   
+
     ros_cluster_cloud = pcl_to_ros(cluster_cloud)
  
-    # TODO: Publish ROS messages
+    # Publish ROS messages
     pcl_objects_pub.publish(pcl_to_ros_objects)
     pcl_table_pub.publish(pcl_to_ros_table)
 
@@ -180,11 +181,11 @@ def pcl_callback(pcl_msg):
     for index, pts_list in enumerate(cluster_indices):
             # Grab the points for the cluster from the extracted outliers (cloud_objects)
             pcl_cluster = extracted_outliers.extract(pts_list)
-            # TODO: convert the cluster from pcl to ROS using helper function
+            ## Convert the cluster from pcl to ROS using helper function
             ros_cluster = pcl_to_ros(pcl_cluster)
 
             # Extract histogram features
-            # TODO: complete this step just as is covered in capture_features.py
+            #Compute the color and surface normal histograms
             chist = compute_color_histograms(ros_cluster, using_hsv = True )
             normals = get_normals(ros_cluster)
             normal_hist = compute_normal_histograms(normals)
@@ -211,12 +212,8 @@ def pcl_callback(pcl_msg):
     rospy.loginfo('Detected {} objects: {}'.format(len(detected_objects_labels), detected_objects_labels))
  
     # Publish the list of detected objects
-    # This is the output you'll need to complete the upcoming project!
     detected_objects_pub.publish(detected_objects)
 
-    # Suggested location for where to invoke your pr2_mover() function within pcl_callback()
-    # Could add some logic to determine whether or not your object detections are robust
-    # before calling pr2_mover()
     try:
         pr2_mover(detected_objects)
     except rospy.ROSInterruptException:
@@ -225,13 +222,14 @@ def pcl_callback(pcl_msg):
 # function to load parameters and request PickPlace service
 def pr2_mover(detected_objects):
 
-    # TODO: Initialize variables
+    ## Initialize variables
     test_scene_num = Int32()
     arm_name = String()
     object_name = String()
     pick_pose = Pose()
     place_pose = Pose()
 
+    test_scene_num.data = 2
     detected_object_list = []
     yaml_list = []
     for i in range(len(detected_objects)):
@@ -245,33 +243,30 @@ def pr2_mover(detected_objects):
     centroids = []
     object_list = []
     
-    # TODO: Get/Read parameters
+    # Get/Read parameters
     object_list_param = rospy.get_param('/object_list')
     
-    # run for all the objects in the list
+    # Run for all the objects in the list
     for i in range(len(object_list_param)):
         object_list.append( (object_list_param[i]['name'], object_list_param[i]['group']) )
 
-
-    # TODO: Parse parameters into individual variables
-    test_scene_num.data = 2
-
-    # TODO: Rotate PR2 in place to capture side tables for the collision map
-
-    # TODO: Loop through the pick list
+    # Loop through the pick list
     for item, group in object_list:
         print("item, group in yamla",item, group, "detected", detected_object_list)
         if item in detected_object_list:
             labels = [item]
             object_group = group
             index_item = detected_object_list.index(item)
-            # TODO: Get the PointCloud for a given object and obtain it's centroid
+            
+            ## Get the PointCloud for a given object and obtain it's centroid
             points_arr = ros_to_pcl( detected_objects[detected_object_list.index(item)].cloud).to_array()
             position_mean_list = np.mean(points_arr, axis = 0)[:3]
             centroids = [[np.asscalar(position_mean_list[0]), np.asscalar(position_mean_list[1]), np.asscalar(position_mean_list[2])]]
             # print("centroid", centroids)
 
-            # TODO: Create 'pick_pose' for the object        
+            ## Create 'pick_pose' for the object   
+
+            # Pose() for pick_pose 
             pick_pose.position.x = centroids[0][0]
             pick_pose.position.y = centroids[0][1]
             pick_pose.position.z = centroids[0][2]
@@ -281,7 +276,9 @@ def pr2_mover(detected_objects):
             pick_pose.orientation.z = 0
             pick_pose.orientation.w = 1
 
-            # TODO: Create 'place_pose' for the object    
+            # Create 'place_pose' for the object
+
+            # Parse the information of the dropboxes
             place_point_position = rospy.get_param('/dropbox')
 
             place_pose.orientation.x = 0
@@ -289,30 +286,32 @@ def pr2_mover(detected_objects):
             place_pose.orientation.z = 0
             place_pose.orientation.w = 1
 
-            # The name of the object to be picked
+            ## The name of the object to be picked
             object_name.data = labels[0]
 
-            # TODO: Assign the arm to be used for pick_place
+            ## Assign the arm to be used for pick_place
             if object_group is 'red':
                 arm_name.data = 'left'
+                # to get the place coordinates of left boxes 
                 place_pose.position.x = place_point_position[0]['position'][0]
                 place_pose.position.y = place_point_position[0]['position'][1]
                 place_pose.position.z = place_point_position[0]['position'][2]
             else:
                 arm_name.data = 'right'
+                # to get the place coordinates of right boxes 
                 place_pose.position.x = place_point_position[1]['position'][0]
                 place_pose.position.y = place_point_position[1]['position'][1]
                 place_pose.position.z = place_point_position[1]['position'][2]
 
 
-            # TODO: Create a list of dictionaries (made with make_yaml_dict()) for later output to yaml format
+            # A list of dictionaries for output to yaml format
             # print("sending for yaml dict", test_scene_num, arm_name, object_name, pick_pose, place_pose )
             yaml_dict =  make_yaml_dict(test_scene_num, arm_name, object_name, pick_pose, place_pose )
             yaml_list.append(yaml_dict)
             # print("yaml dictionary given back", yaml_dict)
 
     
-    # TODO: Output your request parameters into output yaml file
+    ## Output your request parameters into output yaml file
     send_to_yaml(filename , yaml_list)
 
     # Wait for 'pick_place_routine' service to come up
