@@ -33,10 +33,9 @@ This provides us with a sparsely sampled point data cloud thus reducing the proc
 ![passthrough in X and Z axis](images/project/passthrough_xz.PNG)
 
 Specifying an axis leads to cropping along that direction with the specified magnitude. I put a passthrough filter for the 
+
 1. `x` axis to filter the surrounding bins.
 2. `z` axis to filter the stand of the table
-3. `y` axis to filter the 
-
 
 ### Random Sample Consensus ( RANSAC )
 
