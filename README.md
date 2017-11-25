@@ -87,6 +87,8 @@ Training with HSV leads to better results than RGB counterparts because it has l
 Just like color histograms, here, shape histograms are made. In each bar(bin), the surface normals of same direction are placed.
 Sphere has a uniform constant surface normal distribution.
 
+The histogram code can be found in the file [features.py](sensor_stick/src/sensor_stick/features.py).
+
 ### Support Vector Machine (SVM)
 Features are stored as normalized histogram (unit variance and zero mean) and given to the SVM for training.
 
@@ -120,10 +122,19 @@ The trained SVM model classifies the captures point out into an object. The accu
 
 
 ### Conclusion:
+
+#### Future Work
+
+This project can be improvised by incorporating the pick and place operations. This will also improve the object recognition because some of the objects are _behind_ others, like in `test3.world`, `glue` is behind the `book` if the `book` is picked up and placed(elsewhere or in the dropbox), the glue will be easily detected as evident from the [output_3_glue_detected.yaml](pr2_robot/scripts/output_3_glue_detected.yaml). 
+
+Also, *collision detection* is an important aspect for the _efficient and safe manipulations_ by the robot.
+
+#### Fails
+
 This project might fail if:
 
 1. Number of tables unknown; RANSAC needs to know the number of cluster to be effective.
-2. If not trained for an object point cloud.
+2. If not trained for an object point cloud; this can be improved by training the SVM on the dataset of lots of real world objects' point cloud.
 3. Passthrough filters need to be changed for different scenarios to best filter to analyze only the objects of value.
 
 
